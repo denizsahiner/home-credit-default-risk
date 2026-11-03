@@ -1,0 +1,44 @@
+{
+ "metrics": {
+  "ROC-AUC": 0.7893389172935299,
+  "Gini": 0.5786778345870598,
+  "PR-AUC": 0.2895378854193892,
+  "LogLoss": 0.23568456879024116,
+  "Brier": 0.0654786865943424,
+  "ECE": 0.001901078720179045,
+  "mean PD": 0.07977714476202927,
+  "observed rate": 0.08072776937710356
+ },
+ "auc_ci_95": [
+  0.7825431179497228,
+  0.7962008183869261
+ ],
+ "policy": {
+  "threshold": 0.22,
+  "approval rate": 0.9201502365738257,
+  "default rate (approved)": 0.05898360192253322,
+  "defaults rejected": 0.327693856998993,
+  "profit / total credit": 0.10529793938723372
+ },
+ "approve_all": {
+  "threshold": 1.01,
+  "approval rate": 1.0,
+  "default rate (approved)": 0.08072776937710356,
+  "defaults rejected": 0.0,
+  "profit / total credit": 0.10093217509766972
+ },
+ "oof_metrics": {
+  "ROC-AUC": 0.7872383069070383,
+  "Gini": 0.5744766138140767,
+  "PR-AUC": 0.27694291088953304,
+  "LogLoss": 0.23725602994658795,
+  "Brier": 0.06602555238977056
+ },
+ "oof_policy": {
+  "threshold": 0.22,
+  "approval rate": 0.9202871451334916,
+  "default rate (approved)": 0.059488158022597375,
+  "defaults rejected": 0.32185297079556896,
+  "profit / total credit": 0.10534083481516086
+ }
+}

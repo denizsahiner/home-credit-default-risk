@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.ipynb_checkpoints/
+.idea/
+.DS_Store
+
+# The Home Credit CSVs exceed GitHub's 100MB file limit (some are 400-700MB).
+# Instead of keeping them in the repo, the README says where to download them.
+home-credit-default-risk/*.csv
+
+# Reproducible model outputs
+artifacts/oof.csv
+artifacts/final_model.txt
+data/submission.csv
