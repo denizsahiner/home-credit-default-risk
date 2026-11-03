@@ -1,13 +1,14 @@
 # Credit Risk Model
 
-Home Credit Default Risk verisiyle temerrüt olasılığı modeli. Veri PostgreSQL'de
-`raw -> stg -> mart` katmanlarından geçer, modeller `modeling.ipynb` içinde eğitilir.
+A probability-of-default model built on the Home Credit Default Risk data. The data flows
+through `raw -> stg -> mart` layers in PostgreSQL, and the models are trained in notebooks.
 
-## Kurulum
+## Setup
 
-1. [Kaggle'daki Home Credit Default Risk](https://www.kaggle.com/c/home-credit-default-risk/data)
-   yarışmasının CSV dosyalarını `home-credit-default-risk/` klasörüne koy.
-2. Ortamı kur:
+1. Download the CSV files from the
+   [Home Credit Default Risk competition on Kaggle](https://www.kaggle.com/c/home-credit-default-risk/data)
+   into the `home-credit-default-risk/` folder.
+2. Set up the environment:
 
    ```bash
    cp .env.example .env
@@ -16,55 +17,56 @@ Home Credit Default Risk verisiyle temerrüt olasılığı modeli. Veri PostgreS
    docker compose up -d
    ```
 
-3. Veri hattını çalıştır:
+3. Run the data pipeline:
 
    ```bash
    venv/bin/python run_pipeline.py
    ```
 
-   `raw` hazırsa yalnızca SQL adımları için `--skip-load` ekle.
+   Add `--skip-load` to run only the SQL steps when `raw` is already loaded.
 
-4. Notebook'ları sırayla çalıştır: `modeling.ipynb`, `model_selection.ipynb`, `final_test.ipynb`.
-   `final_test.ipynb`, `artifacts/test_result.json` varsa durur; test seti yalnızca bir kez kullanılır.
+4. Run the notebooks in order: `modeling.ipynb`, `model_selection.ipynb`, `final_test.ipynb`.
+   `final_test.ipynb` stops if `artifacts/test_result.json` exists, so the test set is used only once.
 
-## Katmanlar
+## Layers
 
-| Şema | İçerik |
+| Schema | Contents |
 |---|---|
-| `raw` | CSV'lerin değiştirilmemiş hali |
-| `stg` | Temizlik ve kaynak bazlı özetler |
-| `mart` | Model özellik tabloları: `mart.features_application`, `mart.features_application_test` |
-| `public` | Meta dosyalar: `columns_description`, `sample_submission` |
+| `raw` | The CSV files, unchanged |
+| `stg` | Cleaning and per-source summaries |
+| `mart` | Model feature tables: `mart.features_application`, `mart.features_application_test` |
+| `public` | Metadata files: `columns_description`, `sample_submission` |
 
-## Dosyalar
+## Files
 
-| Dosya | Görev |
+| File | Purpose |
 |---|---|
-| `run_pipeline.py` | Tüm veri hattını kurar |
-| `load_to_postgres.py` | CSV'leri veritabanına yükler |
-| `sql/` | Dönüşümler; ad sırasıyla çalışır ve tekrar çalıştırılabilir |
-| `modeling.ipynb` | Baseline modeller (`fe_` özellikleri hariç) |
-| `model_selection.ipynb` | CV, `organization_type`, hiperparametre, SHAP, kalibrasyon, eşik, fairness |
-| `final_test.ipynb` | Tek seferlik test değerlendirmesi ve `application_test` tahminleri |
-| `modeling_utils.py` | Notebook'ların ortak yardımcıları ve iş varsayımları |
-| `artifacts/` | Kararlar, test sonucu ve grafikler |
-| `data/split_ids.csv` | Train / validation / test atamaları |
-| `data/submission.csv` | `application_test` tahminleri |
-| `test.ipynb` | İlk veri keşfi |
+| `run_pipeline.py` | Builds the whole data pipeline |
+| `load_to_postgres.py` | Loads the CSV files into the database |
+| `sql/` | Transformations; run in name order and idempotent |
+| `modeling.ipynb` | Baseline models (without the `fe_` features) |
+| `model_selection.ipynb` | CV, `organization_type`, hyperparameters, SHAP, calibration, threshold, fairness |
+| `final_test.ipynb` | One-time test evaluation and `application_test` predictions |
+| `modeling_utils.py` | Shared notebook helpers and business assumptions |
+| `artifacts/` | Decisions, test result and charts |
+| `data/split_ids.csv` | Train / validation / test assignments |
+| `data/submission.csv` | `application_test` predictions (generated, not tracked) |
+| `test.ipynb` | Initial data exploration |
 
-## Sonuç
+## Results
 
-| Ölçüt | Değer |
+| Metric | Value |
 |---|---|
-| Test ROC-AUC | 0.7893 (%95 GA 0.7825-0.7962) |
+| Test ROC-AUC | 0.7893 (95% CI 0.7825-0.7962) |
 | Test Gini | 0.5787 |
 | 5-fold CV ROC-AUC | 0.7873 |
-| Eşik | PD < 0.22 |
-| Testte onay oranı | %92,0 |
-| Onaylananda temerrüt | %5,9 (herkes onaylanırsa %8,1) |
+| Threshold | PD < 0.22 |
+| Test approval rate | 92.0% |
+| Default rate among approved | 5.9% (8.1% if everyone is approved) |
 
-Eşik, kredi tutarı başına %15 marj ve %50 kayıp varsayımıyla seçildi (`MARGIN`, `LGD`).
-Bu değerler gerçek verilerle değiştirilmelidir. Veri yalnızca geçmişte onaylanmış kredileri
-içerdiği için onay oranları gerçek başvuru akışını temsil etmez.
+The threshold assumes a 15% margin and a 50% loss given default per unit of credit
+(`MARGIN`, `LGD`). These values should be replaced with real figures. The data only
+contains loans that were approved in the past, so approval rates do not represent the
+real application flow.
 
-Test seti kullanıldı. Model değişirse yeni bir tarafsız ölçüm için yeni bir veri gerekir.
+The test set has been used. If the model changes, an unbiased evaluation needs new data.
